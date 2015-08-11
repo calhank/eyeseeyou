@@ -7,6 +7,7 @@ Created on Mon Aug 10 00:39:38 2015
 
 ### Imaging functions for emphasizing features
 
+import numpy as np
 from scipy import ndimage
 
 def hipass(image,gaussrad,dilrat):
@@ -15,10 +16,39 @@ def hipass(image,gaussrad,dilrat):
     # followed by a morphological dilate to widen the effect and pick up extra pixels on edges
     # This can be used as a mask for 
 
-    timg = image.reshape(96,96)
+    timg = np.copy(image).reshape(96,96)
     
-    gradim = ndimage.gaussian_gradient_magnitude(timg,.5)
+    gradim = ndimage.gaussian_gradient_magnitude(timg,gaussrad)
     
-    digradim= ndimage.morphology.grey_dilation(gradim,1)
+    digradim= ndimage.morphology.grey_dilation(gradim,dilrat)
     
     return digradim.flatten()
+    
+
+def thresh(image,thr):
+    
+    timg = np.copy(image).reshape(96,96)
+    
+    timg[timg<thr]=0
+    
+    timg[timg>=thr]=255
+    
+    return timg.flatten()
+    
+def neg(image):
+    
+    timg =np.copy(image).reshape(96,96)
+    
+    timg = 255-timg
+    
+    return timg.flatten()
+
+
+def binarize(image):
+    
+    timg = np.copy(image)
+    
+    thr = np.mean(timg)
+    
+    return thresh(timg,thr)
+
