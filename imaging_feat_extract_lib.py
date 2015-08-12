@@ -7,6 +7,9 @@ Created on Mon Aug 10 00:39:38 2015
 
 ### Imaging functions for emphasizing features
 
+# NOTE:   These functions return copies of the original array
+# so as not to destroy the original
+
 import numpy as np
 from scipy import ndimage
 
@@ -46,9 +49,11 @@ def neg(image):
 
 def binarize(image):
     
+    # approximate half the pixels set to 255 , half to 0
+    
     timg = np.copy(image)
     
-    thr = np.mean(timg)
+    thr = np.median(timg)
     
-    return thresh(timg,thr)
+    return thresh(timg,thr).flatten()
 
