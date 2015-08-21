@@ -23,7 +23,7 @@ def hipass(image,gaussrad,dilrat):
     
     gradim = ndimage.gaussian_gradient_magnitude(timg,gaussrad)
     
-    digradim= ndimage.morphology.grey_dilation(gradim,dilrat)
+    digradim= ndimage.morphology.grey_dilation(gradim,size=(dilrat,dilrat))
     
     return digradim.flatten()
     
@@ -57,3 +57,29 @@ def binarize(image):
     
     return thresh(timg,thr).flatten()
 
+def cfar(image,orad,irad):
+    
+    timg = np.copy(image).reshape(96,96)
+    
+    im = ndimage.gaussian_filter(timg,irad)
+    den = ndimage.gaussian_filter(timg,orad) - im
+    
+    return 25*abs((timg-im)/abs(den)).flatten()+127
+    
+def show(image,orad,irad,idil,thr):
+    
+    # This routine uses cfar for edge detection, dilation to 
+    # espand the region and then threshold for using as mask
+    # somewhat optimum values for parameters are 4,1,4,196
+    # best overlay effect plot 0.75*original + 0.25*this image
+    timg= np.copy(image).reshape(96,96)
+    
+    cfarimg = cfar(timg,orad,irad).reshape(96,96)
+    dilimg  = ndimage.grey_dilation(cfarimg,size=(idil,idil))
+    
+    if thr > 0:
+        rimg = thresh(dilimg,thr)
+    else:
+        rimg = dilimg.flatten()
+        
+    return rimg
